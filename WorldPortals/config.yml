@@ -1,0 +1,71 @@
+# WorldPortals plugin configuration file
+# please check updates by subscribing to the project page
+
+
+# spacetime travel damage health cost (2 health points = 1 heart)
+healthCost: 8
+
+# worlds allowed to activate portals (0, 1, 2... = overworld, nether, end...)
+allowedWorlds: [0]
+
+# allow to link portals in different worlds
+interWorlds: false
+
+# whether can overwrite portal destinations
+canChangeDestination: false
+
+
+# localized strings, be careful with screen width, do some tests before
+# please post your custom translations to the project page
+# with non ascii characters use escaped unicodes to avoid encoding problems
+
+lang:
+  alreadySet: Portal already set
+  argsNotMatch: The number of arguments did not match with expected
+  busyName: Name already taken
+  differentWorlds: Can't link portals to different worlds
+  header: "---Portal---\t---Location---\t---Destination---"
+  invalidName: 'Invalid portal name (up to 15 letters, numbers and hyphens)'
+  lookLikeNumber: Can't give a name that looks like a raw number
+  noDestination: "Warning: no destination yet"
+  noSuchDestination: Destination not found
+  notANumber: Second argument should be a number
+  notAPlayer: This feature needs visual selection, you must be a player
+  notAPortal: Target is not a world portal
+  portalSet: Portal ready
+  selfLink: Can't link portals to themselves
+  title: "Portals with '%1$s', page %2$s of %3$s (help: /lp ?)"
+  tooFar: Target is too far
+
+  
+# localized help pages, max 320px screen width (53chars @6px) and 10 lines, do some tests before
+# please post your translations in project page
+
+help.portal: |
+  WorldPortals usage:
+  - build and activate a small 3x4 nether-like portal
+  - look the center cascade, give a name and a destination
+  - enter to get teleported for some health cost
+  Command: /p [own name] <destination name>:
+  - with unnamed portals sets name, otherwise sets destination
+  - optionally can force set name and destination at once
+  - must be looking to a portal
+  See also: /listportals
+
+help.list: |
+  ListPortals description:
+  - list current world portals, by name, according filters
+  Command: /l [pattern] [page]:
+  - pattern: search portals which name contain pattern
+  - page: page to show if portals don't fit in a single one
+  - defaults: empty pattern (all portals), page 1
+  - one parameter like number assumes page, pattern otherwise
+  See also: /portal
+
+
+#
+# admin help: server console additions:
+#
+# - "portallist" command by default gets all pages on console (page 0)
+# - "portal" command has one admin parameter: "REBUILD", that rebuilds all world portals
+#

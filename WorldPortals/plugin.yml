@@ -1,0 +1,15 @@
+name: WorldPortals
+main: cl.netgamer.worldportals.Main
+version: 3
+
+commands:
+   portal:
+      description: 'Builds world portals (help: /p)'
+      aliases: [p]
+   listportals:
+      description: 'Lists world portals (help: /lp ?)'
+      aliases: [lp]
+ 
+ # v2 - add pl alias
+ # v3 - "portallist" command renamed to "listportals" with alias "lp" due alias conflict
+ 
