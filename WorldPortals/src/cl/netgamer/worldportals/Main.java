@@ -18,15 +18,13 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-public final class Main
-	extends JavaPlugin
+public final class Main extends JavaPlugin
 {
-	Structure strc;
-	
+	private Structure struc;
 	private int healthCost;
 	private List<Integer> allowedWorlds;
 	private boolean interWorlds;
-	private boolean canCchangeDestination;
+	private boolean canChangeDestination;
 	private Data data;
 	private Map<Location, Portal> portals = new HashMap<Location, Portal>();
 	private Map<Location, Set<Location>> blocks = new HashMap<Location, Set<Location>>();
@@ -34,29 +32,28 @@ public final class Main
 	//private Map<String, BukkitTask> entityTasks = new HashMap<String, BukkitTask>();
 	private Map<String, Object> lang;
 	private Map<String, BukkitTask> teleports = new HashMap<String, BukkitTask>();
-	
 	private String headerFix;
-	
 	private String headerVar;
 	private String title;
-
 	// priority: 0, 1, 2 = err, warn, info
 	String[] pr = new String[]{"\u00A7D", "\u00A7E", "\u00A7B"};
-
 	
 	
+	// enable plugin
 	public void onEnable()
 	{
-		strc = new Structure();
+		// instace propreties
+		struc = new Structure();
 		new Events(this);
 		getCommand("listportals").setExecutor(new CommandList(this));
 		getCommand("portal").setExecutor(new CommandPortal(this));
 		
+		// load 
 		saveDefaultConfig();
 		healthCost = getConfig().getInt("healthCost");
 		allowedWorlds = getConfig().getIntegerList("allowedWorlds");
 		interWorlds = getConfig().getBoolean("interWorlds");
-		canCchangeDestination = getConfig().getBoolean("canCchangeDestination");
+		canChangeDestination = getConfig().getBoolean("canCchangeDestination");
 		
 		// load configuration sections
 		lang = getConfig().getConfigurationSection("lang").getValues(false);
@@ -69,11 +66,11 @@ public final class Main
 		data = new Data(this);
 		portals = data.loadPortals();
 		for (Location base : portals.keySet())
-			addBlocks(base, strc.getBlocks(base, portals.get(base).getFace()));
+			addBlocks(base, struc.getBlocks(base, portals.get(base).getFace()));
 	}
 	
 	
-	//******* HERE COMES THE INTERESTING PART **********/
+	// BEGIN METHODS
 	
 	
 	// BLOCKS
@@ -107,7 +104,7 @@ public final class Main
 	{
 		// get portal facing if valid
 		Location base = block.getLocation().add(0.0D, -1.0D, 0.0D);
-		int face = strc.match(base, player.getLocation().getYaw());
+		int face = struc.match(base, player.getLocation().getYaw());
 		if (face < 0)
 			return;
 		
@@ -125,7 +122,7 @@ public final class Main
 		portals.put(base, portal);
 		
 		// take note of portal blocks
-		addBlocks(base, strc.build(base, true, face));
+		addBlocks(base, struc.build(base, true, face));
 	}
 	
 	// destroy a portal if were valid
@@ -141,7 +138,7 @@ public final class Main
 		{
 			// delete blocks and data before delete portal, then update references
 			portal = portals.get(base);
-			delBlocks(base, strc.build(base, false, portal.getFace()));
+			delBlocks(base, struc.build(base, false, portal.getFace()));
 			data.deletePortal(portal);
 			portals.remove(base);
 			updateReferences(base, "?");
@@ -210,7 +207,7 @@ public final class Main
 		if (!dest.isEmpty())
 		{
 			// prevent overwrite destination if forbidden
-			if (!canCchangeDestination && portals.containsKey(portal.getDestination())) {
+			if (!canChangeDestination && portals.containsKey(portal.getDestination())) {
 				return msg(player, 0, "alreadySet");
 			}
 			
@@ -251,7 +248,7 @@ public final class Main
 		
 		// set portal
 		data.savePortal(portal);
-		strc.setLabels(portal, name, dest);
+		struc.setLabels(portal, name, dest);
 		return msg(player, 2, "portalSet");
 	}
 	
@@ -261,7 +258,7 @@ public final class Main
 		// iterate portals, match destination, change destination label
 		for (Portal p : portals.values())
 			if (p.hasDestination() && p.getDestination().equals(base))
-				strc.setLabels(p, "", name);
+				struc.setLabels(p, "", name);
 	}
 	
 	// PLAYER MOVEMENT
@@ -353,17 +350,34 @@ public final class Main
 	boolean list(CommandSender sender, String pattern, int page)
 	{
 		pattern = pattern.toLowerCase();
+		boolean matchDestination = false;
 		String table = "";
+		
+		// pre process destination if worth
+		if (pattern.endsWith("?"))
+		{
+			matchDestination = true;
+			pattern = pattern.replaceAll("[?]$", "");
+		}
 		
 		// build table with portals that match pattern
 		for (Portal p : portals.values())
 		{
-			// pattern match
-			if (!p.getName().toLowerCase().contains(pattern))
+			// match destination
+			if (matchDestination)
+			{
+				Portal destination = getDestination(p);
+				if (destination == null)
+					continue;
+				// destination not match
+				if (!destination.getName().toLowerCase().contains(pattern))
+					continue;
+			}
+			// match name
+			else if (!p.getName().toLowerCase().contains(pattern))
 				continue;
 			
 			// add lines to table
-			//table += table.isEmpty() ? "" : "\n";
 			table += "\n"+(p.hasName() ? p.getName() : pr[0]+" ?")+"\t"+p.getEncodedLocation()+"\t";
 			if (portals.containsKey(p.getDestination()) && portals.get(p.getDestination()).hasName())
 				table += portals.get(p.getDestination()).getName();
@@ -396,6 +410,14 @@ public final class Main
 	boolean isPortalBlock(Block block)
 	{
 		return blocks.containsKey(block.getLocation());
+	}
+	
+	// get portal destination
+	private Portal getDestination(Portal source)
+	{
+		if (!source.hasDestination() || !portals.containsKey(source.getDestination()) || !portals.get(source.getDestination()).hasName())
+			return null;
+		return portals.get(source.getDestination());
 	}
 	
 	// get portal selected with crosshair
@@ -432,15 +454,15 @@ public final class Main
 		// destroy all portals first
 		msg(sender, 1, "Destroying portals...");
 		for (Portal p : portals.values())
-			strc.build(p.getLocation(), false, p.getFace());
+			struc.build(p.getLocation(), false, p.getFace());
 		// rebuild portals
 		msg(sender, 1, "Rebuilding portals...");
 		for (Portal p : portals.values())
-			strc.build(p.getLocation(), true, p.getFace());
+			struc.build(p.getLocation(), true, p.getFace());
 		// set labels
 		msg(sender, 1, "Setting labels...");
 		for (Portal p : portals.values())
-			strc.setLabels(p, p.getName(), portals.containsKey(p.getDestination())?portals.get(p.getDestination()).getName():"");
+			struc.setLabels(p, p.getName(), portals.containsKey(p.getDestination())?portals.get(p.getDestination()).getName():"");
 		return msg(sender, 2, "Done.");
 	}
 }

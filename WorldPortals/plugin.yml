@@ -1,6 +1,6 @@
 name: WorldPortals
 main: cl.netgamer.worldportals.Main
-version: 3
+version: 4
 
 commands:
    portal:
@@ -9,7 +9,8 @@ commands:
    listportals:
       description: 'Lists world portals (help: /lp ?)'
       aliases: [lp]
- 
- # v2 - add pl alias
- # v3 - "portallist" command renamed to "listportals" with alias "lp" due alias conflict
+
+# v4 - add select portals that points to 'pattern?' list option 
+# v3 - "portallist" command renamed to "listportals" with alias "lp" due alias conflict
+# v2 - add pl alias
  

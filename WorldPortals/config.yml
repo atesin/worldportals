@@ -55,17 +55,18 @@ help.portal: |
 help.list: |
   ListPortals description:
   - list current world portals, by name, according filters
-  Command: /l [pattern] [page]:
+  Command: /l [pattern[?]] [page]:
   - pattern: search portals which name contain pattern
+  - pattern?: search portals which destination contains pattern
   - page: page to show if portals don't fit in a single one
-  - defaults: empty pattern (all portals), page 1
-  - one parameter like number assumes page, pattern otherwise
+  Defaults: all portals, page 1
+  - one parameter like number assumes page, otherwise pattern
   See also: /portal
 
 
-#
+# 
 # admin help: server console additions:
-#
+# 
 # - "portallist" command by default gets all pages on console (page 0)
 # - "portal" command has one admin parameter: "REBUILD", that rebuilds all world portals
-#
+# 
